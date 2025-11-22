@@ -1,0 +1,119 @@
+Description: TP4 - EC2 avec LabRole et CloudWatch Alarm sur NetworkIn
+Resources:
+  LabInstanceProfile:
+    Properties:
+      Roles:
+        - LabRole
+    Type: AWS::IAM::InstanceProfile
+  PrivateInstanceAZ1:
+    Properties:
+      IamInstanceProfile: !Ref 'LabInstanceProfile'
+      ImageId: ami-0f8f4e8fb1da4298f
+      InstanceType: t3.micro
+      SecurityGroupIds:
+        - sg-06b11d49588ee1605
+      SubnetId: subnet-0a8fc5711de2ce763
+      Tags:
+        - Key: Name
+          Value: PrivateInstanceAZ1
+    Type: AWS::EC2::Instance
+  PrivateInstanceAZ1NetworkInAlarm:
+    Properties:
+      AlarmActions: []
+      AlarmDescription: Surveille les paquets entrants > 1000
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: InstanceId
+          Value: !Ref 'PrivateInstanceAZ1'
+      EvaluationPeriods: 1
+      MetricName: NetworkIn
+      Namespace: AWS/EC2
+      Period: 60
+      Statistic: Average
+      Threshold: 1000
+      Unit: Bytes
+    Type: AWS::CloudWatch::Alarm
+  PrivateInstanceAZ2:
+    Properties:
+      IamInstanceProfile: !Ref 'LabInstanceProfile'
+      ImageId: ami-0f8f4e8fb1da4298f
+      InstanceType: t3.micro
+      SecurityGroupIds:
+        - sg-06b11d49588ee1605
+      SubnetId: subnet-004dc9f9165e52ff7
+      Tags:
+        - Key: Name
+          Value: PrivateInstanceAZ2
+    Type: AWS::EC2::Instance
+  PrivateInstanceAZ2NetworkInAlarm:
+    Properties:
+      AlarmActions: []
+      AlarmDescription: Surveille les paquets entrants > 1000
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: InstanceId
+          Value: !Ref 'PrivateInstanceAZ2'
+      EvaluationPeriods: 1
+      MetricName: NetworkIn
+      Namespace: AWS/EC2
+      Period: 60
+      Statistic: Average
+      Threshold: 1000
+      Unit: Bytes
+    Type: AWS::CloudWatch::Alarm
+  PublicInstanceAZ1:
+    Properties:
+      IamInstanceProfile: !Ref 'LabInstanceProfile'
+      ImageId: ami-0abac8735a38475db
+      InstanceType: t3.micro
+      SecurityGroupIds:
+        - sg-06b11d49588ee1605
+      SubnetId: subnet-074bae4ad43499cd2
+      Tags:
+        - Key: Name
+          Value: PublicInstanceAZ1
+    Type: AWS::EC2::Instance
+  PublicInstanceAZ1NetworkInAlarm:
+    Properties:
+      AlarmActions: []
+      AlarmDescription: Surveille les paquets entrants > 1000
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: InstanceId
+          Value: !Ref 'PublicInstanceAZ1'
+      EvaluationPeriods: 1
+      MetricName: NetworkIn
+      Namespace: AWS/EC2
+      Period: 60
+      Statistic: Average
+      Threshold: 1000
+      Unit: Bytes
+    Type: AWS::CloudWatch::Alarm
+  PublicInstanceAZ2:
+    Properties:
+      IamInstanceProfile: !Ref 'LabInstanceProfile'
+      ImageId: ami-0abac8735a38475db
+      InstanceType: t3.micro
+      SecurityGroupIds:
+        - sg-06b11d49588ee1605
+      SubnetId: subnet-0cbde4dccaf932110
+      Tags:
+        - Key: Name
+          Value: PublicInstanceAZ2
+    Type: AWS::EC2::Instance
+  PublicInstanceAZ2NetworkInAlarm:
+    Properties:
+      AlarmActions: []
+      AlarmDescription: Surveille les paquets entrants > 1000
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: InstanceId
+          Value: !Ref 'PublicInstanceAZ2'
+      EvaluationPeriods: 1
+      MetricName: NetworkIn
+      Namespace: AWS/EC2
+      Period: 60
+      Statistic: Average
+      Threshold: 1000
+      Unit: Bytes
+    Type: AWS::CloudWatch::Alarm

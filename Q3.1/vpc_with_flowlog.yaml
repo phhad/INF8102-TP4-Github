@@ -1,0 +1,38 @@
+Description: TP4 - VPC avec Flow Logs (REJECT) envoyés dans polystudens3
+Resources:
+  FlowLogsRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action:
+              - sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service:
+                - vpc-flow-logs.amazonaws.com
+        Version: '2012-10-17'
+      Policies:
+        - PolicyDocument:
+            Statement:
+              - Action:
+                  - s3:PutObject
+                Effect: Allow
+                Resource: arn:aws:s3:::polystudens3-v2/*
+            Version: '2012-10-17'
+          PolicyName: AllowS3FlowLogs
+    Type: AWS::IAM::Role
+  PolyStudentVPC:
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      Tags:
+        - Key: Name
+          Value: polystudent-vpc
+    Type: AWS::EC2::VPC
+  PolyStudentVPCFlowLog:
+    Properties:
+      LogDestination: arn:aws:s3:::polystudens3-v2
+      LogDestinationType: s3
+      ResourceId: !Ref 'PolyStudentVPC'
+      ResourceType: VPC
+      TrafficType: REJECT
+    Type: AWS::EC2::FlowLog

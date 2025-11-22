@@ -1,0 +1,27 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Enable CloudTrail to log object-level S3 actions on polystudents3
+ 
+Resources:
+  CloudTrailLogBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: cloudtrail-logs-618480996782
+      AccessControl: LogDeliveryWrite
+      VersioningConfiguration:
+        Status: Enabled
+ 
+  S3ActivityTrail:
+    Type: AWS::CloudTrail::Trail
+    Properties:
+      TrailName: S3ObjectActivityTrail
+      S3BucketName: !Ref CloudTrailLogBucket
+      IsLogging: true
+      IsMultiRegionTrail: true
+      IncludeGlobalServiceEvents: true
+      EventSelectors:
+        - ReadWriteType: All
+          IncludeManagementEvents: false
+          DataResources:
+            - Type: AWS::S3::Object
+              Values:
+                - arn:aws:s3:::polystudents3-618480996782/

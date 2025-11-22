@@ -1,0 +1,208 @@
+Description: TP4 - VPC sécurisée avec 2 AZs, sous-réseaux, IGW, NAT, routes et SG - VPC renommée en polystudent-vpc1.
+Outputs:
+  PrivateSubnetAZ1:
+    Value: !Ref 'PrivateSubnetAZ1'
+  PublicSubnetAZ1:
+    Value: !Ref 'PublicSubnetAZ1'
+  VPC:
+    Value: !Ref 'PolyStudentVPC'
+Parameters:
+  VPCCIDR:
+    Default: 10.0.0.0/16
+    Description: CIDR block de la VPC
+    Type: String
+Resources:
+  AttachGateway:
+    Properties:
+      InternetGatewayId: !Ref 'InternetGateway'
+      VpcId: !Ref 'PolyStudentVPC'
+    Type: AWS::EC2::VPCGatewayAttachment
+  EIPAZ1:
+    Properties:
+      Domain: vpc
+    Type: AWS::EC2::EIP
+  EIPAZ2:
+    Properties:
+      Domain: vpc
+    Type: AWS::EC2::EIP
+  InternetGateway:
+    Properties:
+      Tags:
+        - Key: Name
+          Value: polystudent-igw
+    Type: AWS::EC2::InternetGateway
+  NatGatewayAZ1:
+    Properties:
+      AllocationId: !GetAtt 'EIPAZ1.AllocationId'
+      SubnetId: !Ref 'PublicSubnetAZ1'
+      Tags:
+        - Key: Name
+          Value: NAT-AZ1
+    Type: AWS::EC2::NatGateway
+  NatGatewayAZ2:
+    Properties:
+      AllocationId: !GetAtt 'EIPAZ2.AllocationId'
+      SubnetId: !Ref 'PublicSubnetAZ2'
+      Tags:
+        - Key: Name
+          Value: NAT-AZ2
+    Type: AWS::EC2::NatGateway
+  PolyStudentSG:
+    Properties:
+      GroupDescription: Autorise les ports necessaires
+      SecurityGroupIngress:
+        - CidrIp: '0.0.0.0/0'
+          FromPort: 22
+          IpProtocol: tcp
+          ToPort: 22
+        - CidrIp: '0.0.0.0/0'
+          FromPort: 80
+          IpProtocol: tcp
+          ToPort: 80
+        - CidrIp: '0.0.0.0/0'
+          FromPort: 443
+          IpProtocol: tcp
+          ToPort: 443
+        - CidrIp: '0.0.0.0/0'
+          FromPort: 1433
+          IpProtocol: tcp
+          ToPort: 1433
+        - CidrIp: '0.0.0.0/0'
+          FromPort: 5432
+          IpProtocol: tcp
+          ToPort: 5432
+        - CidrIp: '0.0.0.0/0'
+          FromPort: 3306
+          IpProtocol: tcp
+          ToPort: 3306
+        - CidrIp: '0.0.0.0/0'
+          FromPort: 3389
+          IpProtocol: tcp
+          ToPort: 3389
+        - CidrIp: '0.0.0.0/0'
+          FromPort: 1514
+          IpProtocol: tcp
+          ToPort: 1514
+        - CidrIp: '0.0.0.0/0'
+          FromPort: 9200
+          IpProtocol: tcp
+          ToPort: 9300
+        - CidrIp: '0.0.0.0/0'
+          FromPort: 53
+          IpProtocol: tcp
+          ToPort: 53
+        - CidrIp: '0.0.0.0/0'
+          FromPort: 53
+          IpProtocol: udp
+          ToPort: 53
+      Tags:
+        - Key: Name
+          Value: polystudent-sg
+      VpcId: !Ref 'PolyStudentVPC'
+    Type: AWS::EC2::SecurityGroup
+  PolyStudentVPC:
+    Properties:
+      CidrBlock: !Ref 'VPCCIDR'
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: polystudent-vpc1
+    Type: AWS::EC2::VPC
+  PrivAZ1Assoc:
+    Properties:
+      RouteTableId: !Ref 'PrivateRouteTableAZ1'
+      SubnetId: !Ref 'PrivateSubnetAZ1'
+    Type: AWS::EC2::SubnetRouteTableAssociation
+  PrivAZ2Assoc:
+    Properties:
+      RouteTableId: !Ref 'PrivateRouteTableAZ2'
+      SubnetId: !Ref 'PrivateSubnetAZ2'
+    Type: AWS::EC2::SubnetRouteTableAssociation
+  PrivateRouteAZ1:
+    Properties:
+      DestinationCidrBlock: '0.0.0.0/0'
+      NatGatewayId: !Ref 'NatGatewayAZ1'
+      RouteTableId: !Ref 'PrivateRouteTableAZ1'
+    Type: AWS::EC2::Route
+  PrivateRouteAZ2:
+    Properties:
+      DestinationCidrBlock: '0.0.0.0/0'
+      NatGatewayId: !Ref 'NatGatewayAZ2'
+      RouteTableId: !Ref 'PrivateRouteTableAZ2'
+    Type: AWS::EC2::Route
+  PrivateRouteTableAZ1:
+    Properties:
+      Tags:
+        - Key: Name
+          Value: Private-RT-AZ1
+      VpcId: !Ref 'PolyStudentVPC'
+    Type: AWS::EC2::RouteTable
+  PrivateRouteTableAZ2:
+    Properties:
+      Tags:
+        - Key: Name
+          Value: Private-RT-AZ2
+      VpcId: !Ref 'PolyStudentVPC'
+    Type: AWS::EC2::RouteTable
+  PrivateSubnetAZ1:
+    Properties:
+      AvailabilityZone: ca-central-1a
+      CidrBlock: 10.0.128.0/24
+      Tags:
+        - Key: Name
+          Value: Private-AZ1
+      VpcId: !Ref 'PolyStudentVPC'
+    Type: AWS::EC2::Subnet
+  PrivateSubnetAZ2:
+    Properties:
+      AvailabilityZone: ca-central-1b
+      CidrBlock: 10.0.144.0/24
+      Tags:
+        - Key: Name
+          Value: Private-AZ2
+      VpcId: !Ref 'PolyStudentVPC'
+    Type: AWS::EC2::Subnet
+  PubAZ1Assoc:
+    Properties:
+      RouteTableId: !Ref 'PublicRouteTable'
+      SubnetId: !Ref 'PublicSubnetAZ1'
+    Type: AWS::EC2::SubnetRouteTableAssociation
+  PubAZ2Assoc:
+    Properties:
+      RouteTableId: !Ref 'PublicRouteTable'
+      SubnetId: !Ref 'PublicSubnetAZ2'
+    Type: AWS::EC2::SubnetRouteTableAssociation
+  PublicDefaultRoute:
+    Properties:
+      DestinationCidrBlock: '0.0.0.0/0'
+      GatewayId: !Ref 'InternetGateway'
+      RouteTableId: !Ref 'PublicRouteTable'
+    Type: AWS::EC2::Route
+  PublicRouteTable:
+    Properties:
+      Tags:
+        - Key: Name
+          Value: Public-RT
+      VpcId: !Ref 'PolyStudentVPC'
+    Type: AWS::EC2::RouteTable
+  PublicSubnetAZ1:
+    Properties:
+      AvailabilityZone: ca-central-1a
+      CidrBlock: 10.0.0.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: Public-AZ1
+      VpcId: !Ref 'PolyStudentVPC'
+    Type: AWS::EC2::Subnet
+  PublicSubnetAZ2:
+    Properties:
+      AvailabilityZone: ca-central-1b
+      CidrBlock: 10.0.16.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: Public-AZ2
+      VpcId: !Ref 'PolyStudentVPC'
+    Type: AWS::EC2::Subnet

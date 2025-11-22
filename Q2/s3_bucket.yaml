@@ -1,0 +1,18 @@
+Description: TP4 - Bucket S3 sécurisé avec KMS, versioning et accès privé
+Resources:
+  PolyStudentS3:
+    Properties:
+      AccessControl: Private
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+      BucketName: polystudens3-v2
+      Tags:
+        - Key: Name
+          Value: polystudent-s3
+        - Key: Projet
+          Value: TP4
+      VersioningConfiguration:
+        Status: Enabled
+    Type: AWS::S3::Bucket
